@@ -213,21 +213,19 @@ const InventoryPage = () => {
         <div className="flex gap-2 bg-white/80 backdrop-blur-sm p-1.5 rounded-[20px] w-fit shadow-sm border border-white/20">
           <button
             onClick={() => setActiveTab("products")}
-            className={`px-6 py-3 rounded-[16px] font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
-              activeTab === "products"
-                ? "bg-primary text-white shadow-lg shadow-primary/20"
-                : "text-gray-500 hover:text-primary hover:bg-primary/5"
-            }`}
+            className={`px-6 py-3 rounded-[16px] font-bold text-sm transition-all duration-300 flex items-center gap-2 ${activeTab === "products"
+              ? "bg-primary text-white shadow-lg shadow-primary/20"
+              : "text-gray-500 hover:text-primary hover:bg-primary/5"
+              }`}
           >
             รายการสินค้า
           </button>
           <button
             onClick={() => setActiveTab("report")}
-            className={`px-6 py-3 rounded-[16px] font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
-              activeTab === "report"
-                ? "bg-primary text-white shadow-lg shadow-primary/20"
-                : "text-gray-500 hover:text-primary hover:bg-primary/5"
-            }`}
+            className={`px-6 py-3 rounded-[16px] font-bold text-sm transition-all duration-300 flex items-center gap-2 ${activeTab === "report"
+              ? "bg-primary text-white shadow-lg shadow-primary/20"
+              : "text-gray-500 hover:text-primary hover:bg-primary/5"
+              }`}
           >
             รายงานสต็อก
           </button>
@@ -361,11 +359,10 @@ const InventoryPage = () => {
                   <button
                     key={tag}
                     onClick={() => setActiveTag(tag)}
-                    className={`px-5 py-2 rounded-xl text-[10px] font-black whitespace-nowrap transition-all uppercase tracking-widest border ${
-                      activeTag === tag
-                        ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
-                        : "bg-white text-inactive hover:text-gray-900 border-gray-100 hover:bg-gray-50"
-                    }`}
+                    className={`px-5 py-2 rounded-xl text-[10px] font-black whitespace-nowrap transition-all uppercase tracking-widest border ${activeTag === tag
+                      ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
+                      : "bg-white text-inactive hover:text-gray-900 border-gray-100 hover:bg-gray-50"
+                      }`}
                   >
                     {tag}
                   </button>
@@ -383,17 +380,17 @@ const InventoryPage = () => {
                   </p>
                 </div>
               ) : products.filter((p) => {
-                  const matchesTag =
-                    activeTag === "ทั้งหมด" ||
-                    (activeTag === "ทั่วไป" &&
-                      (!p.product_categories ||
-                        p.product_categories.name === "ทั่วไป")) ||
-                    p.product_categories?.name === activeTag;
-                  const matchesSearch =
-                    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    (p.barcode && p.barcode.includes(searchQuery));
-                  return matchesTag && matchesSearch;
-                }).length === 0 ? (
+                const matchesTag =
+                  activeTag === "ทั้งหมด" ||
+                  (activeTag === "ทั่วไป" &&
+                    (!p.product_categories ||
+                      p.product_categories.name === "ทั่วไป")) ||
+                  p.product_categories?.name === activeTag;
+                const matchesSearch =
+                  p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (p.barcode && p.barcode.includes(searchQuery));
+                return matchesTag && matchesSearch;
+              }).length === 0 ? (
                 <div className="col-span-full bg-white rounded-[32px] p-20 text-center shadow-premium border border-gray-100">
                   <Package
                     size={48}
@@ -430,8 +427,8 @@ const InventoryPage = () => {
                     const expDate =
                       sortedBatches.length > 0
                         ? new Date(
-                            sortedBatches[0].expire_date,
-                          ).toLocaleDateString("th-TH")
+                          sortedBatches[0].expire_date,
+                        ).toLocaleDateString("th-TH")
                         : "-";
 
                     // Low stock threshold check (default to 10 if not set)

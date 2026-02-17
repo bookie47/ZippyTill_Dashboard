@@ -32,26 +32,29 @@ const TaxCalculationPage = () => {
     let remaining = taxableIncome;
     let totalTax = 0;
     const brackets = [
-      { limit: 150000, rate: 0 },
-      { limit: 150000, rate: 0.05 },
-      { limit: 200000, rate: 0.1 },
-      { limit: 250000, rate: 0.15 },
-      { limit: 250000, rate: 0.2 },
-      { limit: 1000000, rate: 0.25 },
-      { limit: 3000000, rate: 0.3 },
-      { limit: Infinity, rate: 0.35 },
+      { min: 0, limit: 150000, rate: 0, label: "ยกเว้น (0%)" },
+      { min: 150001, limit: 150000, rate: 0.05, label: "5%" },
+      { min: 300001, limit: 200000, rate: 0.1, label: "10%" },
+      { min: 500001, limit: 250000, rate: 0.15, label: "15%" },
+      { min: 750001, limit: 250000, rate: 0.2, label: "20%" },
+      { min: 1000001, limit: 1000000, rate: 0.25, label: "25%" },
+      { min: 2000001, limit: 3000000, rate: 0.3, label: "30%" },
+      { min: 5000001, limit: Infinity, rate: 0.35, label: "35%" },
     ];
 
+    let currentRateLabel = "0%";
     for (const bracket of brackets) {
       if (remaining <= 0) break;
       const taxableInThisBracket = Math.min(remaining, bracket.limit);
       totalTax += taxableInThisBracket * bracket.rate;
       remaining -= taxableInThisBracket;
+      if (taxableInThisBracket > 0) currentRateLabel = bracket.label;
     }
 
     return {
       taxableIncome,
       totalTax,
+      currentRateLabel
     };
   }, [taxableIncome]);
 
@@ -65,6 +68,20 @@ const TaxCalculationPage = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(val || 0);
+  };
+
+  const formatWithCommas = (val) => {
+    if (!val && val !== 0) return "";
+    const parts = val.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  };
+
+  const handleFormattedInput = (e, setter) => {
+    const rawValue = e.target.value.replace(/,/g, "");
+    if (rawValue === "" || /^\d*\.?\d*$/.test(rawValue)) {
+      setter(rawValue);
+    }
   };
 
   const handleNumberInput = (e, setter) => {
@@ -137,10 +154,10 @@ const TaxCalculationPage = () => {
                   </label>
                 </div>
                 <input
-                  type="number"
-                  value={income}
+                  type="text"
+                  value={formatWithCommas(income)}
                   placeholder="0.00"
-                  onChange={(e) => handleNumberInput(e, setIncome)}
+                  onChange={(e) => handleFormattedInput(e, setIncome)}
                   onWheel={handleWheel}
                   className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/30 transition-all outline-none text-gray-900 font-black text-xl tracking-tighter"
                 />
@@ -154,10 +171,10 @@ const TaxCalculationPage = () => {
                   </label>
                 </div>
                 <input
-                  type="number"
-                  value={expenses}
+                  type="text"
+                  value={formatWithCommas(expenses)}
                   placeholder="0.00"
-                  onChange={(e) => handleNumberInput(e, setExpenses)}
+                  onChange={(e) => handleFormattedInput(e, setExpenses)}
                   onWheel={handleWheel}
                   className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/30 transition-all outline-none text-gray-900 font-black text-xl tracking-tighter"
                 />
@@ -171,10 +188,10 @@ const TaxCalculationPage = () => {
                   </label>
                 </div>
                 <input
-                  type="number"
-                  value={deductions}
+                  type="text"
+                  value={formatWithCommas(deductions)}
                   placeholder="0.00"
-                  onChange={(e) => handleNumberInput(e, setDeductions)}
+                  onChange={(e) => handleFormattedInput(e, setDeductions)}
                   onWheel={handleWheel}
                   className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3.5 focus:ring-2 focus:ring-primary/30 transition-all outline-none text-gray-900 font-black text-xl tracking-tighter"
                 />
@@ -195,43 +212,74 @@ const TaxCalculationPage = () => {
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 relative z-10">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 relative z-10">
               {[
-                { label: "รายได้รวม (บาท)", val: income || 0, icon: <TrendingUp className="w-3.5 h-3.5" />, color: "text-emerald-500" },
-                { label: "ค่าใช้จ่าย (บาท)", val: expenses || 0, icon: <DollarSign className="w-3.5 h-3.5" />, color: "text-rose-500" },
-                { label: "ค่าลดหย่อน (บาท)", val: deductions || 0, icon: <Wallet className="w-3.5 h-3.5" />, color: "text-purple-500" },
-                { label: "รายได้สุทธิ", val: pitResult.taxableIncome, icon: <ReceiptText className="w-3.5 h-3.5" />, color: "text-primary" }
+                { label: "รายได้รวม", val: income || 0, icon: <TrendingUp className="w-4 h-4" />, iconBg: "bg-emerald-50/50", iconColor: "text-emerald-500" },
+                { label: "ค่าใช้จ่าย", val: expenses || 0, icon: <DollarSign className="w-4 h-4" />, iconBg: "bg-rose-50/50", iconColor: "text-rose-500" },
+                { label: "ค่าลดหย่อน", val: deductions || 0, icon: <Wallet className="w-4 h-4" />, iconBg: "bg-purple-50/50", iconColor: "text-purple-500" },
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-gray-50/50 backdrop-blur-sm rounded-2xl p-5 border border-gray-100 hover:border-primary/20 transition-all shadow-sm group/item"
+                  className="bg-gray-50/40 backdrop-blur-sm rounded-[24px] p-6 border border-gray-100 hover:border-primary/10 transition-all shadow-sm group/item flex flex-col gap-4"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={`${item.color}`}>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${item.iconBg} ${item.iconColor}`}>
                       {item.icon}
                     </div>
-                    <span className="text-[10px] font-black text-inactive uppercase tracking-wider">
+                    <span className="text-[11px] font-bold text-inactive uppercase tracking-wider">
                       {item.label}
                     </span>
                   </div>
-                  <div className="text-2xl font-black tracking-tighter text-gray-900">
+                  <div className="text-3xl font-black tracking-tighter text-gray-900 break-all line-clamp-2">
                     ฿{formatCurrency(item.val)}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="bg-primary rounded-2xl p-6 relative z-10 border border-primary/10 shadow-premium group hover:scale-[1.01] transition-all cursor-default overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-xl" />
-              <span className="text-[10px] font-black text-white/70 uppercase tracking-[0.15em] block mb-1">
-                ภาษีที่ต้องชำระ (เบื้องต้น)
-              </span>
-              <div className="text-4xl font-black text-white tracking-tighter">
-                ฿{formatCurrency(pitResult.totalTax)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+              {[
+                { label: "รายได้สุทธิ", val: pitResult.taxableIncome, icon: <ReceiptText className="w-4 h-4" /> },
+                { label: "อัตราภาษีสุดท้าย", val: pitResult.currentRateLabel, isRate: true, icon: <Calculator className="w-4 h-4" /> }
+              ].map((item, idx) => (
+                <div
+                  key={idx + 3}
+                  className="bg-[#FFF5EB] rounded-[24px] p-6 border border-orange-200/50 transition-all shadow-sm group/item flex flex-col gap-4"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-orange-500/10 text-orange-600">
+                      {item.icon}
+                    </div>
+                    <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                      {item.label}
+                    </span>
+                  </div>
+                  <div className="text-4xl font-black tracking-tighter text-orange-600 break-all line-clamp-2">
+                    {item.isRate ? item.val : `฿${formatCurrency(item.val)}`}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-[#FF5C00] rounded-[24px] p-8 md:p-10 relative z-10 shadow-premium transition-all cursor-default overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-[80px]" />
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                  <span className="text-[12px] font-bold text-white/90 uppercase tracking-[0.1em] block mb-2">
+                    ภาษีที่ต้องชำระ (ประเมินเบื้องต้น)
+                  </span>
+                  <div className="text-6xl md:text-7xl font-black text-white tracking-tighter flex items-baseline gap-3">
+                    ฿{formatCurrency(pitResult.totalTax)}
+                    <span className="text-2xl font-bold text-white/80 tracking-normal uppercase">บาท</span>
+                  </div>
+                </div>
+                <div className="bg-white/20 h-20 w-20 rounded-[20px] flex items-center justify-center backdrop-blur-md border border-white/30 shrink-0">
+                  <Calculator className="w-10 h-10 text-white" strokeWidth={2.5} />
+                </div>
               </div>
             </div>
 
-            <div className="mt-auto px-5 py-3 bg-gray-50 rounded-xl border border-gray-100 text-[10px] font-bold text-inactive relative z-10 italic">
+            <div className="mt-auto px-6 py-4 bg-[#F0F7FF] rounded-[20px] border border-blue-100/50 text-[11px] font-bold text-blue-400/80 text-center relative z-10">
               หมายเหตุ: การคำนวณนี้เป็นเพียงการประมาณการเบื้องต้น
             </div>
           </div>
@@ -252,10 +300,10 @@ const TaxCalculationPage = () => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-inactive uppercase tracking-wider">ยอดรวมซื้อ (รวม VAT)</label>
                 <input
-                  type="number"
-                  value={buyVatAmount}
+                  type="text"
+                  value={formatWithCommas(buyVatAmount)}
                   placeholder="0"
-                  onChange={(e) => handleNumberInput(e, setBuyVatAmount)}
+                  onChange={(e) => handleFormattedInput(e, setBuyVatAmount)}
                   onWheel={handleWheel}
                   className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-200 outline-none text-gray-900 font-black text-lg tracking-tighter transition-all"
                 />
@@ -280,10 +328,10 @@ const TaxCalculationPage = () => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-inactive uppercase tracking-wider">ยอดรวมขาย (รวม VAT)</label>
                 <input
-                  type="number"
-                  value={sellVatAmount}
+                  type="text"
+                  value={formatWithCommas(sellVatAmount)}
                   placeholder="0"
-                  onChange={(e) => handleNumberInput(e, setSellVatAmount)}
+                  onChange={(e) => handleFormattedInput(e, setSellVatAmount)}
                   onWheel={handleWheel}
                   className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none text-gray-900 font-black text-lg tracking-tighter transition-all"
                 />
@@ -368,8 +416,8 @@ const TaxCalculationPage = () => {
                     <tr
                       key={idx}
                       className={`transition-all duration-300 group border-l-4 ${isActive
-                          ? "bg-primary/5 border-primary"
-                          : "hover:bg-gray-50/50 border-transparent"
+                        ? "bg-primary/5 border-primary"
+                        : "hover:bg-gray-50/50 border-transparent"
                         }`}
                     >
                       <td className={`px-8 py-4 text-xs font-bold ${isActive ? "text-primary" : "text-gray-600"}`}>
@@ -378,8 +426,8 @@ const TaxCalculationPage = () => {
                       <td className="px-8 py-4 text-right">
                         <span
                           className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase transition-all duration-300 ${isActive
-                              ? "bg-primary text-white shadow-md scale-110"
-                              : "bg-gray-100 text-inactive group-hover:bg-orange-50 group-hover:text-orange-600 border border-transparent group-hover:border-orange-100"
+                            ? "bg-primary text-white shadow-md scale-110"
+                            : "bg-gray-100 text-inactive group-hover:bg-orange-50 group-hover:text-orange-600 border border-transparent group-hover:border-orange-100"
                             }`}
                         >
                           {row.rate}
