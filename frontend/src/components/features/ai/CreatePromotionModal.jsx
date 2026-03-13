@@ -22,6 +22,7 @@ import {
   Settings2,
   Edit,
   Scale,
+  RotateCw,
 } from "lucide-react";
 import { createPortal } from "react-dom";
 import PromoProductEditModal from "./PromoProductEditModal";
@@ -75,9 +76,9 @@ const CreatePromotionModal = ({
         setIsPreviewLoading(true);
         try {
           const result = await promotionService.previewPromotion(
-            { 
-              type: promoData.type === "percent" ? "discount_percent" : "discount_amount", 
-              value: promoData.value 
+            {
+              type: promoData.type === "percent" ? "discount_percent" : "discount_amount",
+              value: promoData.value
             },
             selectedProducts
           );
@@ -332,11 +333,10 @@ const CreatePromotionModal = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === tab.id
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === tab.id
                   ? "bg-white text-primary shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               <tab.icon size={14} />
               {tab.label}
@@ -393,11 +393,10 @@ const CreatePromotionModal = ({
                   <div
                     key={product.id}
                     onClick={() => handleToggleProduct(product)}
-                    className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer group ${
-                      isSelected
+                    className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer group ${isSelected
                         ? "border-primary bg-primary/5 ring-4 ring-primary/10"
                         : "border-gray-100 hover:border-gray-200 bg-white"
-                    } ${isExpired ? "opacity-60 grayscale-[0.5]" : ""}`}
+                      } ${isExpired ? "opacity-60 grayscale-[0.5]" : ""}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
@@ -425,11 +424,10 @@ const CreatePromotionModal = ({
                         </div>
                       </div>
                       <div
-                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                          isSelected
+                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${isSelected
                             ? "bg-primary border-primary shadow-lg shadow-primary/30"
                             : "border-gray-200 group-hover:border-primary/30"
-                        }`}
+                          }`}
                       >
                         {isSelected && (
                           <Check size={14} className="text-white" strokeWidth={4} />
@@ -440,11 +438,10 @@ const CreatePromotionModal = ({
                     <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <div
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            (product.stock || 0) <= (product.lowStockThreshold || 0)
+                          className={`w-1.5 h-1.5 rounded-full ${(product.stock || 0) <= (product.lowStockThreshold || 0)
                               ? "bg-red-500 animate-pulse"
                               : "bg-emerald-500"
-                          }`}
+                            }`}
                         />
                         <span className="text-[10px] font-bold text-gray-500">
                           คงเหลือ {(product.stock || 0).toLocaleString()}{" "}
@@ -544,7 +541,7 @@ const CreatePromotionModal = ({
     now.setHours(0, 0, 0, 0);
 
     if (!promoData.name.trim()) errors.name = "กรุณาระบุชื่อโปรโมชั่น";
-    
+
     if (promoData.type === "custom") {
       if (!promoData.prompt.trim()) errors.prompt = "กรุณาระบุรายละเอียดโปรโมชั่น";
     } else {
@@ -624,7 +621,7 @@ const CreatePromotionModal = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400"><AlertCircle size={10} />สามารถพิมพ์ภาษาไทยได้</div>
                     <button type="button" disabled={isParsingPrompt || !promoData.prompt.trim()} onClick={async (e) => { e.preventDefault(); e.stopPropagation(); setIsParsingPrompt(true); try { const result = await aiService.parsePromoPrompt({ prompt: promoData.prompt }); if (result) { setPromoData((prev) => { const mappedType = result.promotion_type === 'percent' ? 'percent' : result.promotion_type === 'fixed' ? 'amount' : result.promotion_type === 'buy_x_get_y' ? 'buy_get' : 'custom'; return { ...prev, name: result.promotion_name || prev.name, type: result.promotion_type ? mappedType : prev.type, value: result.reward?.discount_percent || result.reward?.discount_amount || prev.value, minSpend: result.conditions?.min_purchase || prev.minSpend }; }); } } catch (err) { console.error(err); alert("ไม่สามารถวิเคราะห์ข้อมูลได้ กรุณาลองใหม่อีกครั้ง"); } finally { setIsParsingPrompt(false); } }} className="px-4 py-2.5 bg-gradient-to-r from-primary to-orange-600 text-white rounded-xl font-bold text-xs hover:shadow-lg hover:scale-105 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2">
-                       <Sparkles size={14} className={isParsingPrompt ? "animate-spin" : ""} />{isParsingPrompt ? "กำลังวิเคราะห์..." : "AI วิเคราะห์เงื่อนไข"}
+                      <Sparkles size={14} className={isParsingPrompt ? "animate-spin" : ""} />{isParsingPrompt ? "กำลังวิเคราะห์..." : "AI วิเคราะห์เงื่อนไข"}
                     </button>
                   </div>
                 </div>
@@ -786,23 +783,23 @@ const CreatePromotionModal = ({
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-right"><span className="text-sm font-black bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">฿{(item.promoPrice || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right"><span className="text-sm font-black bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">฿{(item.promoPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
                         <td className="px-4 py-4 whitespace-nowrap text-right">
                           <div className="flex flex-col items-end">
                             <span
                               className={`text-sm font-bold ${item.isLoss ? "text-red-500 animate-pulse" : item.isProfitAcceptable ? "text-emerald-600" : "text-orange-500"}`}
                             >
-                              ฿{(item.promoProfit || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                              ฿{(item.promoProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                             {item.isLoss && <span className="text-[9px] font-bold text-red-600 uppercase mt-0.5 bg-red-50 px-1 rounded">ราคาต่ำกว่าต้นทุน</span>}
                             <span className="text-xs text-gray-500">({item.profitPercentage.toFixed(1)}%)</span>
                           </div>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-right"><span className="text-sm font-semibold text-gray-700">฿{(item.dynamicAcceptableProfit || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right"><span className="text-sm font-semibold text-gray-700">฿{(item.dynamicAcceptableProfit || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
                         <td className="px-4 py-4 whitespace-nowrap text-center"><span className="text-sm font-bold text-gray-900">{(product?.quantity || 0).toLocaleString()}</span></td>
                         <td className="px-4 py-4 whitespace-nowrap text-center"><span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded">{product?.expiryDate ? new Date(product.expiryDate).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" }) : "ไม่มีกำหนด"}</span></td>
                         <td className="px-4 py-4 whitespace-nowrap text-right"><span className="text-sm font-semibold text-gray-600">{(product?.remaining || 0).toLocaleString()} {product?.unitType}</span></td>
-                        <td className="px-4 py-4 whitespace-nowrap text-right"><span className="text-sm font-bold text-gray-900">฿{(product?.lastSalePrice || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></td>
+                        <td className="px-4 py-4 whitespace-nowrap text-right"><span className="text-sm font-bold text-gray-900">฿{(product?.lastSalePrice || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></td>
                         <td className="px-4 py-4 whitespace-nowrap text-center">
                           <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingProduct(product); setEditFormData({ quantity: product.quantity, costPrice: product.costPrice, expiryDate: product.expiryDate, acceptableProfit: product.acceptableProfit, lastSalePrice: product.lastSalePrice }); setShowEditModal(true); }} className="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-all flex items-center justify-center mx-auto group"><Edit size={16} className="group-hover:scale-110 transition-transform" /></button>
                         </td>
